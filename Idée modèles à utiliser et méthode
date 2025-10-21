@@ -1,0 +1,126 @@
+Excellent choix 💡 — les **données d’utilisateurs Steam** (nombre de joueurs connectés par heure/jour, par jeu ou globalement) sont **parfaites** pour un projet de séries temporelles : elles présentent **saisonnalités multiples**, **tendances**, **effets externes (week-end, vacances, sorties de jeux)**, et **événements ponctuels (promotions, tournois)**.
+C’est un cas très riche où tu peux comparer des approches classiques, machine learning et deep learning.
+
+---
+
+## 🎯 Objectif de projet possible
+
+> **Prévoir le nombre de joueurs connectés sur Steam dans les prochains jours / heures**,
+> et **comparer la performance** de différentes méthodes (ARIMA, Prophet, XGBoost, LSTM, etc.).
+
+---
+
+## 🧠 Pourquoi ce dataset est intéressant
+
+* Données **publiques et très structurées** (par heure sur steamcharts.com ou SteamDB).
+* Claires **saisonnalités hebdomadaires** (week-end > semaine).
+* **Tendance long terme** (hausse/baisse du nombre d’utilisateurs).
+* **Événements exogènes** : soldes Steam, sorties de jeux AAA, confinement COVID, etc.
+* Possibilité de **multi-séries** : global + top jeux (CS2, Dota 2, PUBG...).
+
+---
+
+## 📊 Jeu de données
+
+1. **Steam Global Users (Heure par heure)**
+
+   * Source : [SteamCharts](https://steamcharts.com/app/753) ou [SteamDB](https://steamdb.info/graph/)
+   * Données disponibles via API non officielle ou CSV (export possible sur SteamCharts).
+   * Colonnes typiques :
+
+     ```
+     datetime | concurrent_players
+     ```
+   * Fréquence : horaire ou quotidienne.
+
+2. **Steam Top Games Dataset (Kaggle)**
+
+   * Exemple : [Steam Game Popularity Dataset (Kaggle)](https://www.kaggle.com/datasets/nikdavis/steam-store-games)
+   * Permet d’ajouter des variables : genre, date de sortie, avis, etc.
+
+3. **Option avancée : ajouter des variables externes**
+
+   * `is_weekend`, `holiday`, `steam_sale` (booléens)
+   * `covid_lockdown` (proxy via Google Trends ou période connue)
+
+---
+
+## ⚙️ Modèles à comparer
+
+| Type              | Modèle                                   | Description                                                | Points forts                                     |
+| ----------------- | ---------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------ |
+| **Statistique**   | **ARIMA / SARIMA**                       | Bon pour tendance + saisonnalité simple                    | Baseline robuste                                 |
+|                   | **Prophet (Facebook)**                   | Modélise tendance, saisonnalités multiples, jours spéciaux | Facile, gère irrégularités                       |
+| **ML classique**  | **XGBoost / Random Forest**              | Utilise features laggées (t-1, t-24, t-168) + calendaires  | Gère non-linéarités, rapide                      |
+| **Deep Learning** | **LSTM / GRU**                           | Capture les dépendances temporelles longues                | Performant si beaucoup de données                |
+|                   | **Temporal Convolutional Network (TCN)** | Alternative aux LSTM, plus rapide à entraîner              | Efficace sur séries multivariées                 |
+|                   | **N-BEATS / TFT**                        | SOTA en prévision temporelle                               | Gère plusieurs horizons, saisonnalités complexes |
+
+---
+
+## 🧩 Structure de ton projet
+
+### 1. **Préparation des données**
+
+* Charger et nettoyer les données Steam (p. ex. 2020–2025, fréquence horaire).
+* Créer des **features temporelles** : `hour`, `dayofweek`, `month`, `is_weekend`, `is_sale`.
+* (Optionnel) Créer des **lags** (`y_t-1`, `y_t-24`, `y_t-168`) et des **moyennes mobiles**.
+
+### 2. **Exploration**
+
+* Plot global du nombre d’utilisateurs.
+* Heatmap `jour vs heure`.
+* Décomposition (tendance, saisonnalité, résidu) → utile pour justifier les modèles.
+
+### 3. **Comparaison de modèles**
+
+* **Train/Test split temporel** :
+
+  * Exemple : Train : 2020–2024 ; Test : janvier–mars 2025.
+  * Ou bien **rolling forecast origin** pour plus de robustesse.
+* Modèles à comparer : ARIMA, Prophet, XGBoost, LSTM (au minimum 3 familles différentes).
+* Hyperparamètres optimisés via grid search ou auto-ARIMA.
+
+### 4. **Évaluation**
+
+* Métriques :
+
+  * MAE, RMSE, MAPE/sMAPE.
+  * Optionnel : *Diebold–Mariano test* pour la significativité des écarts.
+* Graphiques :
+
+  * Courbe réelle vs prédite.
+  * Erreur par jour/semaine.
+  * Importance des features (pour ML).
+
+### 5. **Interprétation et discussion**
+
+* Analyse des forces/faiblesses :
+
+  * ARIMA : bon court terme, mauvais sur gros pics.
+  * Prophet : flexible mais peut lisser trop.
+  * XGBoost : capte les patterns hebdos mais pas les pics inattendus.
+  * LSTM : excellent sur grandes séries continues mais lourd à tuner.
+* Discussion des **impacts d’événements externes** (p. ex. Steam Winter Sale).
+
+---
+
+## 🚀 Exemple de question de recherche
+
+> « Quelle méthode fournit les prévisions les plus précises pour le nombre d’utilisateurs connectés à Steam à court terme (horizon 24 h) ?
+> Et dans quelles conditions (semaine, week-end, événements spéciaux) certains modèles surpassent-ils les autres ? »
+
+---
+
+## 🔬 Extension possible
+
+* **Multi-séries** : prédire le nombre de joueurs sur plusieurs jeux (CS2, Dota2, PUBG).
+  → Permet de comparer **modèles locaux** (par jeu) vs **modèle global** (tous jeux combinés).
+* **Prévision hiérarchique** : somme des joueurs des jeux = total Steam.
+* **Détection d’anomalies** (pics anormaux = sorties, updates).
+* **Dashboards** : visualisation dynamique (Plotly ou Dash).
+
+---
+
+Souhaites-tu que je te construise une **structure de projet complète** (sections, code d’exemple, modèles et métriques) pour ce thème ?
+Je peux te proposer une version académique prête à adapter pour ton rapport (avec plan et snippets Python pour ARIMA/XGBoost/LSTM).
